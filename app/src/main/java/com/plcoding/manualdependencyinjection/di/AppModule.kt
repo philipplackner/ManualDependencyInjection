@@ -1,5 +1,6 @@
 package com.plcoding.manualdependencyinjection.di
 
+import android.content.Context
 import com.plcoding.manualdependencyinjection.data.AuthApi
 import com.plcoding.manualdependencyinjection.data.AuthRepositoryImpl
 import com.plcoding.manualdependencyinjection.domain.AuthRepository
@@ -12,24 +13,22 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.create
 import javax.inject.Singleton
 
-@Module
-@InstallIn(SingletonComponent::class)
-object AppModule {
+interface AppModule {
+    val authApi: AuthApi
+    val authRepository: AuthRepository
+}
 
-    @Provides
-    @Singleton
-    fun provideAuthApi(): AuthApi {
-        return Retrofit.Builder()
+class AppModuleImpl(
+    private val appContext: Context
+): AppModule {
+    override val authApi: AuthApi by lazy {
+        Retrofit.Builder()
             .baseUrl("https://my-url.com")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create()
     }
-
-    @Provides
-    @Singleton
-    fun provideAuthRepository(authApi: AuthApi): AuthRepository {
-        return AuthRepositoryImpl(authApi)
+    override val authRepository: AuthRepository by lazy {
+        AuthRepositoryImpl(authApi)
     }
-
 }
